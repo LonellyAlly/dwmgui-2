@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# Get current keyboard layout
+layout=$(setxkbmap -query | grep layout | awk '{print $2}' | cut -c1-2 | tr 'a-z' 'A-Z')
+
+if [ -z "$layout" ]; then
+    layout="US"
+fi
+
+echo "  $layout"
+
+# Handle clicks - cycle through layouts
+case $1 in
+    1) 
+        case $layout in
+            "US") setxkbmap fr ;;
+            "FR") setxkbmap de ;;
+            "DE") setxkbmap es ;;
+            "ES") setxkbmap us ;;
+            *) setxkbmap us ;;
+        esac
+        ;;
+esac

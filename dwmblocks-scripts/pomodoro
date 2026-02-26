@@ -1,0 +1,82 @@
+#!/bin/sh
+
+# Timer file
+timer_file="/tmp/pomodoro_timer"
+state_file="/tmp/pomodoro_state"
+
+# Default values
+work_time=25 # minutes
+break_time=5 # minutes
+
+# Initialize if not exists
+if [ ! -f "$timer_file" ]; then
+  echo "0" >"$timer_file"
+  echo "work" >"$state_file"
+fi
+
+timer=$(cat "$timer_file")
+state=$(cat "$state_file")
+
+# Handle clicks
+case $1 in
+1) # Start/Stop
+  if [ "$timer" -eq 0 ]; then
+    # Start timer
+    if [ "$state" = "work" ]; then
+      echo "$work_time" >"$timer_file"
+    else
+      echo "$break_time" >"$timer_file"
+    fi
+  else
+    # Reset timer
+    echo "0" >"$timer_file"
+  fi
+  ;;
+2) # Switch mode
+  if [ "$state" = "work" ]; then
+    echo "break" >"$state_file"
+  else
+    echo "work" >"$state_file"
+  fi
+  echo "0" >"$timer_file"
+  ;;
+3) # Reset all
+  echo "0" >"$timer_file"
+  echo "work" >"$state_file"
+  ;;
+esac
+
+# Update timer if running
+if [ "$timer" -gt 0 ]; then
+  # Decrement timer every minute
+  last_check=$(stat -c %Y "$timer_file" 2>/dev/null || echo "0")
+  now=$(date +%s)
+  if [ $((now - last_check)) -gt 60 ]; then
+    timer=$((timer - 1))
+    echo "$timer" >"$timer_file"
+
+    # Timer finished
+    if [ "$timer" -eq 0 ]; then
+      notify-send "Pomodoro" "$state time finished!"
+      # Switch state
+      if [ "$state" = "work" ]; then
+        echo "break" >"$state_file"
+      else
+        echo "work" >"$state_file"
+      fi
+    fi
+  fi
+fi
+
+# Display timer
+if [ "$state" = "work" ]; then
+  icon=""
+else
+  icon=""
+fi
+
+if [ "$timer" -gt 0 ]; then
+  echo "$icon $timer min"
+else
+  echo "$icon Ready"
+fi

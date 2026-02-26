@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# Get brightness percentage with error handling
+percent=0
+
+if command -v brightnessctl >/dev/null 2>&1; then
+    brightness=$(brightnessctl g 2>/dev/null || echo "0")
+    max=$(brightnessctl m 2>/dev/null || echo "100")
+    if [ "$max" -gt 0 ]; then
+        percent=$((brightness * 100 / max))
+    fi
+elif command -v xbacklight >/dev/null 2>&1; then
+    percent=$(xbacklight -get 2>/dev/null | cut -d'.' -f1 || echo "0")
+fi
+
+# Ensure percent is a number
+if ! [ "$percent" -eq "$percent" ] 2>/dev/null; then
+    percent=0
+fi
+
+# Choose icon
+if [ "$percent" -gt 80 ]; then
+    icon="☀"
+elif [ "$percent" -gt 30 ]; then
+    icon="🌤"
+else
+    icon="🌙"
+fi
+
+echo "$icon $percent%"
+
+# Handle clicks
+case $1 in
+    4) brightnessctl s +5% 2>/dev/null ;;
+    5) brightnessctl s 5%- 2>/dev/null ;;
+esac

@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# Get CPU temperature with error handling
+cpu_temp="N/A"
+
+if [ -f /sys/class/thermal/thermal_zone0/temp ]; then
+    temp_raw=$(cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null)
+    if [ -n "$temp_raw" ]; then
+        cpu_temp=$((temp_raw / 1000))
+    fi
+elif command -v sensors >/dev/null 2>&1; then
+    temp_raw=$(sensors 2>/dev/null | grep -i "core 0" | awk '{print $3}' | tr -d '+°C' | cut -d'.' -f1)
+    if [ -n "$temp_raw" ]; then
+        cpu_temp=$temp_raw
+    fi
+fi
+
+# Check if we got a valid temperature
+if [ "$cpu_temp" = "N/A" ] || ! [ "$cpu_temp" -eq "$cpu_temp" ] 2>/dev/null; then
+    echo " N/A"
+    exit 0
+fi
+
+# Choose icon based on temperature
+if [ "$cpu_temp" -gt 80 ]; then
+    icon=" "
+elif [ "$cpu_temp" -gt 60 ]; then
+    icon=""
+elif [ "$cpu_temp" -gt 40 ]; then
+    icon=""
+else
+    icon=""
+fi
+
+echo "$icon $cpu_temp°C"

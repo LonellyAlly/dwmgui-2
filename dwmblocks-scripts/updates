@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# For Arch Linux
+if command -v checkupdates >/dev/null 2>&1; then
+    # checkupdates is from pacman-contrib
+    updates=$(checkupdates 2>/dev/null | wc -l)
+    if [ "$updates" -gt 0 ]; then
+        echo "  $updates"
+    else
+        echo "  Updated"
+    fi
+elif command -v pacman >/dev/null 2>&1; then
+    # Fallback: manually check updates (slower)
+    updates=$(pacman -Qu 2>/dev/null | wc -l)
+    if [ "$updates" -gt 0 ]; then
+        echo "  $updates"
+    else
+        echo "  Updated"
+    fi
+else
+    echo "  N/A"
+fi
+
+# Handle clicks
+case $1 in
+    1) alacritty -e sh -c 'sudo pacman -Syu && read -p "Press enter to exit"' & ;;
+esac

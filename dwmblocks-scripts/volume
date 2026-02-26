@@ -1,0 +1,45 @@
+#!/bin/sh
+
+# Get volume and mute status with error handling
+volume=0
+mute="false"
+
+if command -v pamixer >/dev/null 2>&1; then
+    volume=$(pamixer --get-volume 2>/dev/null || echo "0")
+    mute=$(pamixer --get-mute 2>/dev/null || echo "false")
+elif command -v amixer >/dev/null 2>&1; then
+    volume=$(amixer get Master 2>/dev/null | grep -o '[0-9]*%' | head -1 | tr -d '%' || echo "0")
+    mute=$(amixer get Master 2>/dev/null | grep -o '\[off\]' | head -1 || echo "")
+    if [ -n "$mute" ]; then
+        mute="true"
+    else
+        mute="false"
+    fi
+else
+    echo "  No mixer"
+    exit 0
+fi
+
+# Ensure volume is a number
+if ! [ "$volume" -eq "$volume" ] 2>/dev/null; then
+    volume=0
+fi
+
+# Choose icon
+if [ "$mute" = "true" ]; then
+    echo "  Muted"
+elif [ "$volume" -gt 70 ]; then
+    echo "  $volume%"
+elif [ "$volume" -gt 30 ]; then
+    echo "  $volume%"
+else
+    echo "  $volume%"
+fi
+
+# Handle clicks
+case $1 in
+    1) pavucontrol & ;;
+    2) pamixer -t 2>/dev/null ;;
+    3) pamixer -d 5 2>/dev/null ;;
+    4) pamixer -i 5 2>/dev/null ;;
+esac

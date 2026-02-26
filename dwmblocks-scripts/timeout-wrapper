@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Timeout wrapper for dwmblocks scripts
+# Usage: timeout-wrapper <timeout> <script> [args]
+
+timeout="$1"
+shift
+
+# Run the script with timeout
+timeout "$timeout" "$@" 2>/dev/null || echo "ERR"

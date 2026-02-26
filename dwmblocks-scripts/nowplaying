@@ -1,0 +1,32 @@
+#!/bin/sh
+
+if command -v playerctl >/dev/null 2>&1; then
+    status=$(playerctl status 2>/dev/null)
+    if [ "$status" = "Playing" ] || [ "$status" = "Paused" ]; then
+        artist=$(playerctl metadata artist 2>/dev/null)
+        title=$(playerctl metadata title 2>/dev/null)
+        
+        if [ "$status" = "Playing" ]; then
+            icon=""
+        else
+            icon=""
+        fi
+        
+        if [ -n "$artist" ]; then
+            echo "$icon $artist - $title" | cut -c 1-50
+        else
+            echo "$icon $title" | cut -c 1-50
+        fi
+    else
+        echo "  No player"
+    fi
+else
+    echo "  No playerctl"
+fi
+
+# Handle clicks
+case $1 in
+    1) playerctl play-pause ;;
+    2) playerctl previous ;;
+    3) playerctl next ;;
+esac

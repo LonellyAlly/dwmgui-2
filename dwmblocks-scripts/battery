@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# Check if battery exists
+if [ ! -f /sys/class/power_supply/BAT1/capacity ]; then
+  echo "  No battery"
+  exit 0
+fi
+
+cap=$(cat /sys/class/power_supply/BAT1/capacity 2>/dev/null || echo "0")
+status=$(cat /sys/class/power_supply/BAT1/status 2>/dev/null || echo "Unknown")
+
+# Ensure cap is a number
+if ! [ "$cap" -eq "$cap" ] 2>/dev/null; then
+  cap=0
+fi
+
+# Choose icon based on capacity
+if [ "$status" = "Charging" ]; then
+  icon=""
+elif [ "$cap" -gt 90 ]; then
+  icon=""
+elif [ "$cap" -gt 60 ]; then
+  icon=""
+elif [ "$cap" -gt 40 ]; then
+  icon=""
+elif [ "$cap" -gt 15 ]; then
+  icon=""
+else
+  icon=""
+fi
+
+# Warn if low battery
+if [ "$cap" -lt 15 ] && [ "$status" != "Charging" ]; then
+  echo "$icon $cap% "
+else
+  echo "$icon $cap%"
+fi
+
+# Handle clicks
+case $1 in
+1) notify-send "Battery Info" "$(acpi -V 2>/dev/null || echo 'No ACPI')" ;;
+esac

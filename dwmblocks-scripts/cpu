@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# Get CPU usage percentage (more reliable method)
+cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}' | cut -d'.' -f1)
+
+# If the above doesn't work, try this alternative
+if [ -z "$cpu_usage" ] || [ "$cpu_usage" = "0" ]; then
+    cpu_usage=$(ps -eo pcpu | awk 'NR>1 {sum+=$1} END {printf "%d", sum}')
+fi
+
+# Ensure we have a number
+if [ -z "$cpu_usage" ] || ! [ "$cpu_usage" -eq "$cpu_usage" ] 2>/dev/null; then
+    cpu_usage="0"
+fi
+
+# Get load average
+load=$(uptime | awk -F'load average:' '{print $2}' | cut -d',' -f1-3 | sed 's/ //g')
+
+# Get temperature
+if [ -f /sys/class/thermal/thermal_zone0/temp ]; then
+    temp=$(cat /sys/class/thermal/thermal_zone0/temp)
+    temp=$((temp / 1000))
+    temp_info="${temp}°C"
+else
+    temp_info="N/A"
+fi
+
+# Choose icon based on usage
+if [ "$cpu_usage" -gt 80 ] 2>/dev/null; then
+    icon=" "
+elif [ "$cpu_usage" -gt 50 ] 2>/dev/null; then
+    icon=""
+else
+    icon=""
+fi
+
+echo "$icon $cpu_usage% | $load | $temp_info"
+
+# Handle clicks
+case $1 in
+    1) alacritty -e htop & ;;
+esac

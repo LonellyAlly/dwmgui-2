@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# Get disk usage for root and home
+root_usage=$(df -h / | awk 'NR==2 {print $5}' | tr -d '%')
+
+# Choose icon based on usage
+if [ "$root_usage" -gt 90 ]; then
+  root_icon=" "
+else
+  root_icon=""
+fi
+
+# Build output
+if [ -n "$home_usage" ]; then
+  output="$output | : $home_usage%"
+fi
+
+echo "$output"
+
+# Handle clicks
+case $1 in
+1) alacritty -e df -h & ;;
+esac

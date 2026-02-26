@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# Find the battery directory
+battery_dir=""
+for batt in /sys/class/power_supply/BAT*; do
+    if [ -d "$batt" ]; then
+        battery_dir="$batt"
+        break
+    fi
+done
+
+# If no battery found, exit silently
+if [ -z "$battery_dir" ]; then
+    exit 0
+fi
+
+# Get battery info
+cap=$(cat "$battery_dir/capacity" 2>/dev/null || echo "0")
+status=$(cat "$battery_dir/status" 2>/dev/null || echo "Unknown")
+
+# Simple icon based on charge
+if [ "$status" = "Charging" ]; then
+    icon="⚡"
+elif [ "$cap" -lt 15 ]; then
+    icon="🪫"
+else
+    icon="🔋"
+fi
+
+echo "$icon$cap%"

@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# Cache file for IP
+cache_file="/tmp/publicip.cache"
+
+# Update every 30 minutes (1800 seconds)
+if [ -f "$cache_file" ]; then
+    last_update=$(stat -c %Y "$cache_file")
+    now=$(date +%s)
+    if [ $((now - last_update)) -lt 1800 ]; then
+        cat "$cache_file"
+        exit 0
+    fi
+fi
+
+# Get public IP
+ip=$(curl -s -4 ifconfig.co 2>/dev/null || curl -s ipinfo.io/ip 2>/dev/null || echo "N/A")
+
+if [ "$ip" != "N/A" ]; then
+    echo "🌐 $ip" > "$cache_file"
+    echo "🌐 $ip"
+else
+    echo "🌐 N/A"
+fi

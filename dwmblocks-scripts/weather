@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# Configuration - Change this to your city/location
+# Use "ip" for automatic location based on your IP, or specify a city
+LOCATION="ip"  # or "London", "New York", etc.
+CACHE_FILE="/tmp/weather.cache"
+
+# Update every 30 minutes (1800 seconds)
+if [ -f "$CACHE_FILE" ]; then
+    last_update=$(stat -c %Y "$CACHE_FILE" 2>/dev/null || echo "0")
+    now=$(date +%s)
+    if [ $((now - last_update)) -lt 1800 ]; then
+        cat "$CACHE_FILE"
+        exit 0
+    fi
+fi
+
+# Get weather from wttr.in with timeout (5 seconds)
+if [ "$LOCATION" = "ip" ]; then
+    # Auto location based on IP
+    weather=$(curl -s --max-time 5 "wttr.in/?format=%c+%t+%w" 2>/dev/null)
+else
+    # Specific location
+    weather=$(curl -s --max-time 5 "wttr.in/$LOCATION?format=%c+%t+%w" 2>/dev/null)
+fi
+
+# Check if we got a valid response
+if [ -n "$weather" ] && [ "$weather" != "Unknown location" ] && [ "$weather" != "curl: (28) Operation timed out"* ]; then
+    # Clean up the output (remove extra spaces)
+    weather=$(echo "$weather" | tr -s ' ')
+    echo " $weather" > "$CACHE_FILE"
+    echo " $weather"
+else
+    # Try a simpler format as fallback
+    weather=$(curl -s --max-time 3 "wttr.in/?format=%t" 2>/dev/null)
+    if [ -n "$weather" ] && [ "$weather" != "Unknown location" ]; then
+        echo " $weather" > "$CACHE_FILE"
+        echo " $weather"
+    else
+        echo " N/A" > "$CACHE_FILE"
+        echo " N/A"
+    fi
+fi

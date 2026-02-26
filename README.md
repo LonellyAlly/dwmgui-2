@@ -9,7 +9,9 @@ $ cd ../dwmblocks <br/>
 $ make clean install <br/>
 $ cd ../st <br/>
 $ make clean install <br/>
-
+$ chmod +x ./dwmblocks-scripts/* <br/>
+$ mkdir -p ~/.local/bin/dwmblocks <br/>
+$ cp -r ./dwmblocks-scripts/* ~/.local/bin/dwmblocks <br/>
 # Startx setup (.xinitrc) 
 xset r rate 200 35 & <br/> 
 output eDP-1 --mode 1920x1080 <br/>

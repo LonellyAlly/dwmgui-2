@@ -6,7 +6,14 @@
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
 /*static char *font = "JetBrains Mono Nerd Font:pixelsize=24:antialias=true:autohint=true";*/
-static char *font = "Courier:pixelsize=16:antialias=true:autohint=true, Noto Sans CJK JP:pixelsize=24:antialias=true:autohint=true";
+
+/* Main Nerd Font for icons and text */
+static char *font = "JetBrainsMono Nerd Font Mono:pixelsize=16:antialias=true";
+
+/* Fallback fonts for emoji */
+static char *font2[] = {
+    "Noto Color Emoji:pixelsize=16:antialias=true:autohint=true",
+};
 
 static int borderpx = 10;
 

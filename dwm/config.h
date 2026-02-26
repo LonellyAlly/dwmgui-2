@@ -12,9 +12,12 @@ static       int smartgaps          = 0;        /* 1 means no outer gap when the
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
 static const char *fonts[] = {
-    "Courier:style=Bold:size=12",
+    "JetBrainsMono Nerd Font:size=12",
+    "Symbols Nerd Font:size=12",
+    "Noto Color Emoji:size=12",
+    "Hack Nerd Font Mono:size=12"
 };
-static const char dmenufont[]       = "Courier:style=Bold:size=12";
+static const char dmenufont[]       = "Hack Nerd Font:style=Bold:size=12";
 static const char col_gray1[]       = "#000000";
 static const char col_gray2[]       = "#444444";
 static const char col_gray3[]       = "#bbbbbb";
@@ -96,6 +99,11 @@ static const char *screenshotcmd[] = { "/bin/sh", "-c", "maim -s | xclip -select
 static const char *rofi[]  = { "rofi", "-show", "drun", "-theme", "~/.config/rofi/config.rasi", NULL };
 static const char *emacsclient[]  = { "emacsclient", "-c", "-a", "", NULL };
 
+/* Pomodoro click commands */
+static const char *pomodoro_left[] = { "/bin/sh", "-c", "pomodoro 1", NULL };
+static const char *pomodoro_middle[] = { "/bin/sh", "-c", "pomodoro 2", NULL };
+static const char *pomodoro_right[] = { "/bin/sh", "-c", "pomodoro 3", NULL };
+
 static Keychord *keychords[] = {
     /* key count, modifier/key sequence,            function,        argument */
 
@@ -156,11 +164,6 @@ static Keychord *keychords[] = {
     &((Keychord){2, {{MODKEY, XK_f}, {0, XK_o}}, spawn, SHCMD("$HOME/repos/dmenu-scripts/tmux-dmenu.sh")}),
     &((Keychord){2, {{MODKEY, XK_f}, {0, XK_b}}, spawn, SHCMD("$HOME/repos/dmenu-scripts/bookmarks-dmenu.sh")}),
     
-    // Emacs Scripts
-    // &((Keychord){2, {{MODKEY, XK_e}, {0, XK_t}}, spawn, SHCMD("$HOME/scripts/tmux-dmenu.sh")}),
-    // &((Keychord){2, {{MODKEY, XK_e}, {0, XK_a}}, spawn, SHCMD("$HOME/scripts/tmux-dmenu.sh")}),
-    // &((Keychord){2, {{MODKEY, XK_e}, {0, XK_t}}, spawn, SHCMD("$HOME/scripts/tmux-dmenu.sh")}),
-
     // TAGKEYS
     TAGKEYS(                        XK_1,                      0)
     TAGKEYS(                        XK_2,                      1)
@@ -179,13 +182,14 @@ static Keychord *keychords[] = {
     &((Keychord){1, {{0, XF86XK_AudioLowerVolume}}, spawn, {.v = (const char*[]){"pactl", "set-sink-volume", "@DEFAULT_SINK@", "-3%", NULL} } }),
 };
 
-
 /* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 static const Button buttons[] = {
 	/* click                event mask      button          function        argument */
 	{ ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
 	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
-	{ ClkStatusText,        0,              Button2,        spawn,          {.v = termcmd } },
+	{ ClkStatusText,        0,              Button1,        spawn,          {.v = pomodoro_left } },
+	{ ClkStatusText,        0,              Button2,        spawn,          {.v = pomodoro_middle } },
+	{ ClkStatusText,        0,              Button3,        spawn,          {.v = pomodoro_right } },
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
 	{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
@@ -194,4 +198,3 @@ static const Button buttons[] = {
 	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
 	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
 };
-
